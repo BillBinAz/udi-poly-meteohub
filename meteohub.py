@@ -20,7 +20,7 @@ class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'MeteoHub'
-        self.address = 'mbweather'
+        self.address = 'bb_meteo_hub'
         self.primary = self.address
         self.port = 5557
         self.ip = ""
@@ -156,10 +156,10 @@ class Controller(polyinterface.Controller):
         except:
             LOGGER.error("Failure trying to connect to MeteoHub device.")
 
-        def query(self):
+    def query(self):
 
-            for node in self.nodes:
-                self.nodes[node].reportDrivers()
+        for node in self.nodes:
+            self.nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
         """
