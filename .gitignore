@@ -75,3 +75,4 @@ target/
 #Project specific
 polyinterface
 /.idea/
+/logs/

@@ -3,12 +3,13 @@
 Polyglot v2 node server for MeteoHub
 """
 import datetime
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 import httplib2
 import math
 import polyinterface
 import sys
+import syslog
 
 import uom
 import write_profile
@@ -20,9 +21,8 @@ class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'MeteoHub'
-        self.address = 'bb_meteo_hub'
+        self.address = 'bb_meteohub'
         self.primary = self.address
-        self.port = 5557
         self.ip = ""
         self.units = ""
         self.temperature_list = {}
@@ -83,12 +83,11 @@ class Controller(polyinterface.Controller):
                               "Bad response from meteohub " + str(resp))
                 print(datetime.datetime.now().time(),
                       " -  Bad response from meteohub. " + str(resp))
-            xml_data = ET.fromstring(content)
+            LOGGER.debug(content)
 
-            LOGGER.debug(xml_data)
             # Parse the XML data
             try:
-                tree = ET.XML(xml_data.decode())
+                tree = ElementTree.fromstring(content)
 
                 LOGGER.debug('tag = ' + tree.tag)
                 for child in tree.getchildren():
@@ -151,10 +150,10 @@ class Controller(polyinterface.Controller):
                             LOGGER.debug('    gust    = ' + child.get('gust'))
                             LOGGER.debug('    direct  = ' + child.get('dir'))
 
-            except:
-                LOGGER.error("Failure while parsing MeteoHub data.")
-        except:
-            LOGGER.error("Failure trying to connect to MeteoHub device.")
+            except Exception as e:
+                LOGGER.error("Failure while parsing MeteoHub data. " + e)
+        except Exception as e:
+            LOGGER.error("Failure trying to connect to MeteoHub device. " + e)
 
     def query(self):
 
