@@ -1,0 +1,16 @@
+<nodeDefs>
+  <nodeDef id="MeteoHub" nls="ctl" nodeType="139">
+    <cmds>
+      <accepts>
+        <cmd id="DISCOVER"/>
+        <cmd id="REMOVE_NOTICES_ALL"/>
+        <cmd id="UPDATE_PROFILE"/>
+      </accepts>
+      <sends/>
+    </cmds>
+    <sts>
+      <st editor="bool" id="ST"/>
+      <st editor="I_VOLTS" id="GV0"/>
+    </sts>
+  </nodeDef>
+</nodeDefs>

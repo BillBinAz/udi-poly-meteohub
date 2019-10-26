@@ -1,0 +1,106 @@
+<editors>
+  <editor id="I_DEGREE">
+    <range max="360" min="-360" prec="0" uom="14"/>
+  </editor>
+  <editor id="I_LAST_UPDATE">
+    <range max="5000000000" min="0" prec="0" uom="58"/>
+  </editor>
+  <editor id="I_TREND">
+    <range nls="EN_TREND" subset="0-2" uom="25"/>
+  </editor>
+  <editor id="I_RAINTYPE">
+    <range nls="EN_RAINTYPE" subset="0-3" uom="25"/>
+  </editor>
+  <editor id="I_CARDINAL">
+    <range nls="EN_CARDINAL" subset="0-15" uom="25"/>
+  </editor>
+  <editor id="I_WIND_DIRECTION">
+    <range nls="EN_WIND_DIRECTION" subset="0-8" uom="25"/>
+  </editor>
+  <editor id="I_SENSOR_STATUS">
+    <range nls="EN_SENSOR_STATUS" subset="0,1" uom="25"/>
+  </editor>
+  <editor id="I_SENSOR_TRIGGER">
+    <range nls="EN_SENSOR_TRIGGER" subset="0,1" uom="25"/>
+  </editor>
+  <editor id="I_TEMP_C">
+    <range max="75" min="-50" prec="1" step="0.5" uom="4"/>
+  </editor>
+  <editor id="I_TEMP_F">
+    <range max="150" min="-50" prec="1" step="1" uom="17"/>
+  </editor>
+  <editor id="I_HUMIDITY">
+    <range max="100" min="0" prec="0" uom="22"/>
+  </editor>
+  <editor id="I_INHG">
+    <range max="100" min="0" prec="3" uom="23"/>
+  </editor>
+  <editor id="I_MB">
+    <range max="10000" min="0" prec="3" uom="117"/>
+  </editor>
+  <editor id="I_MILES">
+    <range max="20000" min="0" prec="2" uom="56"/>
+  </editor>
+  <editor id="I_KM">
+    <range max="20000" min="0" prec="2" uom="83"/>
+  </editor>
+  <editor id="I_VOLTS">
+    <range max="20" min="0" prec="2" uom="72"/>
+  </editor>
+  <editor id="I_LUX">
+    <range max="2000000" min="0" prec="0" uom="36"/>
+  </editor>
+  <editor id="I_UV">
+    <range max="20" min="0" prec="1" uom="71"/>
+  </editor>
+  <editor id="I_RADIATION">
+    <range max="200000" min="0" prec="1" uom="74"/>
+  </editor>
+  <editor id="I_MPH">
+    <range max="2000" min="0" prec="1" uom="48"/>
+  </editor>
+  <editor id="I_MPS">
+    <range max="20000" min="0" prec="1" uom="49"/>
+  </editor>
+  <editor id="I_KPH">
+    <range max="20000" min="0" prec="1" uom="32"/>
+  </editor>
+  <editor id="I_INHR">
+    <range max="2000" min="0" prec="3" uom="24"/>
+  </editor>
+  <editor id="I_MMHR">
+    <range max="20000" min="0" prec="3" uom="46"/>
+  </editor>
+  <editor id="I_INCHES">
+    <range max="20000" min="0" prec="3" uom="105"/>
+  </editor>
+  <editor id="I_MM">
+    <range max="20000" min="0" prec="3" uom="82"/>
+  </editor>
+  <editor id="I_DAYS">
+    <range max="20000" min="0" prec="2" uom="10"/>
+  </editor>
+  <editor id="I_HOURS">
+    <range max="20000" min="0" prec="0" uom="20"/>
+  </editor>
+  <editor id="I_MINUTES">
+    <range max="200000" min="0" prec="0" uom="20"/>
+  </editor>
+  <editor id="I_SECONDS">
+    <range max="20000000" min="0" prec="0" uom="57"/>
+  </editor>
+  <editor id="I_ENERGY">
+    <range max="20000000" min="0" prec="2" uom="56"/>
+  </editor>
+  <editor id="I_WIND_DIR_DEGREES">
+    <range max="360" min="0" prec="1" uom="76"/>
+  </editor>
+  <editor id="I_RSSI">
+    <range max="0" min="-500" prec="0" uom="25"/>
+  </editor>
+
+  <!-- Boolean -->
+  <editor id="bool">
+    <range subset="0,1" uom="2"/>
+  </editor>
+</editors>
