@@ -274,7 +274,6 @@ class Controller(polyinterface.Controller):
             self.addNotice("IP/Host address of the MeteoHub device is required.")
 
     def set_configuration(self, config):
-        default_port = 5557
         default_ip = ""
         default_elevation = 0
 
