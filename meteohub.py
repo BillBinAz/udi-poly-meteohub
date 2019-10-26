@@ -151,9 +151,10 @@ class Controller(polyinterface.Controller):
                             LOGGER.debug('    direct  = ' + child.get('dir'))
 
             except Exception as e:
-                LOGGER.error("Failure while parsing MeteoHub data. " + e)
+                LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
+
         except Exception as e:
-            LOGGER.error("Failure trying to connect to MeteoHub device. " + e)
+            LOGGER.error("Failure trying to connect to MeteoHub device. " + str(e))
 
     def query(self):
 
