@@ -2,7 +2,7 @@
 
 import os
 import zipfile
-
+import json
 import uom
 
 pfx = "write_profile:"
@@ -188,7 +188,8 @@ def get_server_data(logger):
 # set the configuration.
 
 if __name__ == "__main__":
-    import logging, json
+    import logging
+    import json
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(
