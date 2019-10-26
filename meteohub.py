@@ -83,7 +83,7 @@ class Controller(polyinterface.Controller):
                               "Bad response from meteohub " + str(resp))
                 print(datetime.datetime.now().time(),
                       " -  Bad response from meteohub. " + str(resp))
-            LOGGER.debug(content)
+                LOGGER.debug(content)
 
             # Parse the XML data
             try:
@@ -95,7 +95,6 @@ class Controller(polyinterface.Controller):
                     if child.tag == 'UV':
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['uv'], float(child.get('index')))
-                        LOGGER.debug('    UV index = ' + child.get('index'))
                     elif child.tag == 'SOL':
                         LOGGER.debug('    Solar   = ' + child.get('rad'))
                         self.nodes['light'].setDriver(
@@ -103,9 +102,6 @@ class Controller(polyinterface.Controller):
                             float(child.get('rad')))
                     elif child.tag == 'RAIN':
                         if child.get('id') == 'rain0':
-                            LOGGER.debug('    Rate    = ' + child.get('rate'))
-                            # LOGGER.debug('    Delta   = ' + child.get('delta'))
-                            LOGGER.debug('    Total   = ' + child.get('total'))
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['rate'], float(child.get('rate')))
                             self.nodes['rain'].setDriver(
@@ -119,9 +115,6 @@ class Controller(polyinterface.Controller):
                                 uom.TEMP_DRVS['main'], float(child.get('temp')))
                             self.nodes['humidity'].setDriver(
                                 uom.HUMD_DRVS['main'], float(child.get('hum')))
-                            LOGGER.debug('    Dewpoin = ' + child.get('dew'))
-                            LOGGER.debug('    Humidit = ' + child.get('hum'))
-                            LOGGER.debug('    Temp    = ' + child.get('temp'))
                     elif child.tag == 'THB':
                         if child.get('id') == 'thb0':
                             self.nodes['pressure'].setDriver(
@@ -129,11 +122,6 @@ class Controller(polyinterface.Controller):
                             self.nodes['pressure'].setDriver(
                                 uom.PRES_DRVS['sealevel'],
                                 float(child.get('seapress')))
-                            LOGGER.debug('    Dewpoin = ' + child.get('dew'))
-                            LOGGER.debug('    Humidit = ' + child.get('hum'))
-                            LOGGER.debug('    Temp    = ' + child.get('temp'))
-                            LOGGER.debug('    Sea     = ' + child.get('seapress'))
-                            LOGGER.debug('    pressur = ' + child.get('press'))
                     elif child.tag == 'WIND':
                         if child.get('id') == 'wind0':
                             self.nodes['temperature'].setDriver(
@@ -145,10 +133,6 @@ class Controller(polyinterface.Controller):
                                 uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['winddir'], float(child.get('dir')))
-                            LOGGER.debug('    chill   = ' + child.get('chill'))
-                            LOGGER.debug('    wind    = ' + child.get('wind'))
-                            LOGGER.debug('    gust    = ' + child.get('gust'))
-                            LOGGER.debug('    direct  = ' + child.get('dir'))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
