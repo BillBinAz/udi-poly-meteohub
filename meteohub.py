@@ -259,7 +259,6 @@ class Controller(polyinterface.Controller):
         # configuration event?
         LOGGER.info("Adding configuation")
         self.addCustomParam({
-            'UDPPort': self.port,
             'IPAddress': self.ip,
             'Units': self.units,
         })
@@ -281,11 +280,6 @@ class Controller(polyinterface.Controller):
 
         LOGGER.info("Check for existing configuration value")
 
-        if 'Port' in config['customParams']:
-            self.port = int(config['customParams']['UDPPort'])
-        else:
-            self.udp_port = default_port
-
         if 'IPAddress' in config['customParams']:
             self.ip = config['customParams']['IPAddress']
         else:
@@ -294,7 +288,7 @@ class Controller(polyinterface.Controller):
         if 'Units' in config['customParams']:
             self.units = config['customParams']['Units']
         else:
-            self.units = 'metric'
+            self.units = 'us'
 
         return self.units
 
