@@ -1,6 +1,6 @@
 # controller
-ND-MeteoBridge-NAME = MeteoBridge
-ND-MeteoBridge-ICON = Weather
+ND-MeteoHub-NAME = MeteoHub
+ND-MeteoHub-ICON = Weather
 CMD-ctl-DISCOVER-NAME = Re-Discover
 CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
 CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove Notices

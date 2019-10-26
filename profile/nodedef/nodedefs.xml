@@ -1,5 +1,5 @@
 <nodeDefs>
-  <nodeDef id="MeteoBridge" nls="ctl" nodeType="139">
+  <nodeDef id="MeteoHub" nls="ctl" nodeType="139">
     <cmds>
       <accepts>
         <cmd id="DISCOVER"/>

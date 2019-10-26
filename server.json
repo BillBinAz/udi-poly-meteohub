@@ -5,13 +5,13 @@
   "executable": "meteohub.py",
   "install": "install.sh",
   "description": "Add weather data from MeteoHub to the ISY994",
-  "notice": "see http://www.meteobridge.com for more information",
+  "notice": "see http://www.MeteoHub.com for more information",
   "shortPoll": "5",
   "longPoll": "60",
   "profile_version": "0.1.1",
   "credits": [
     {
-      "title": "MeteoBridge: Weather Data",
+      "title": "MeteoHub: Weather Data",
       "author": "Bill Bennett",
       "version": "0.0.1",
       "date": "October 10, 2019",

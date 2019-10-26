@@ -1,6 +1,6 @@
 ## Configuration
 
-The MeteoBridge node server has the following user configuration
+The MeteoHub node server has the following user configuration
 parameters:
 
 - IPAddress: The IP address of the MeteoHub.
