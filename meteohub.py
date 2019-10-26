@@ -89,14 +89,14 @@ class Controller(polyinterface.Controller):
             try:
                 tree = ElementTree.fromstring(content)
 
-                LOGGER.debug('tag = ' + tree.tag)
+                # LOGGER.debug('tag = ' + tree.tag)
                 for child in tree.getchildren():
-                    LOGGER.debug('   child = ' + child.tag)
+                    # LOGGER.debug('   child = ' + child.tag)
                     if child.tag == 'UV':
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['uv'], float(child.get('index')))
                     elif child.tag == 'SOL':
-                        LOGGER.debug('    Solar   = ' + child.get('rad'))
+                        # LOGGER.debug('    Solar   = ' + child.get('rad'))
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['solar_radiation'],
                             float(child.get('rad')))
