@@ -60,7 +60,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
     # Need to translate temperature.main into <st id="ST" editor="TEMP_C" />
     # and     translate temperature.extra1 into <st id="GV5" editor="TEMP_C" />
 
-    if (len(temperature_list) > 0):
+    if len(temperature_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('temperature', '139T'))
         nodedef.write("    <sts>\n")
         for t in temperature_list:
@@ -68,7 +68,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(humidity_list) > 0):
+    if len(humidity_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('humidity', '139H'))
         nodedef.write("    <sts>\n")
         for t in humidity_list:
@@ -76,7 +76,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(pressure_list) > 0):
+    if len(pressure_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('pressure', '139P'))
         nodedef.write("    <sts>\n")
         for t in pressure_list:
@@ -84,7 +84,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(wind_list) > 0):
+    if len(wind_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('wind', '139W'))
         nodedef.write("    <sts>\n")
         for t in wind_list:
@@ -92,7 +92,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(rain_list) > 0):
+    if len(rain_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('precipitation', '139R'))
         nodedef.write("    <sts>\n")
         for t in rain_list:
