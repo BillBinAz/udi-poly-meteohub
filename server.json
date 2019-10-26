@@ -1,0 +1,22 @@
+{
+  "name": "MeteoHub",
+  "docs": "",
+  "type": "python3",
+  "executable": "meteohub.py",
+  "install": "install.sh",
+  "description": "Add weather data from MeteoHub to the ISY994",
+  "notice": "see http://www.meteobridge.com for more information",
+  "shortPoll": "5",
+  "longPoll": "60",
+  "profile_version": "0.1.1",
+  "credits": [
+    {
+      "title": "MeteoBridge: Weather Data",
+      "author": "Bill Bennett",
+      "version": "0.0.1",
+      "date": "October 10, 2019",
+      "source": "https://github.com/bbennett66/udi-poly-meteohub",
+      "license": "https://github.com/bbennett66/udi-poly-meteohub/blob/master/LICENSE"
+    }
+  ]
+}
