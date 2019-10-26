@@ -104,7 +104,7 @@ class Controller(polyinterface.Controller):
                     elif child.tag == 'RAIN':
                         if child.get('id') == 'rain0':
                             LOGGER.debug('    Rate    = ' + child.get('rate'))
-                            LOGGER.debug('    Delta   = ' + child.get('delta'))
+                            # LOGGER.debug('    Delta   = ' + child.get('delta'))
                             LOGGER.debug('    Total   = ' + child.get('total'))
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['rate'], float(child.get('rate')))
