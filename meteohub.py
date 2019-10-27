@@ -67,6 +67,8 @@ class Controller(polyinterface.Controller):
         if self.ip == "":
             return
 
+        LOGGER.info("LongPoll")
+
         try:
             #
             # get the last 5 minutes worth of data
