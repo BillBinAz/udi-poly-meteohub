@@ -108,8 +108,7 @@ class Controller(polyinterface.Controller):
                         sol = 1
                         # LOGGER.debug('    Solar   = ' + child.get('rad'))
                         self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['solar_radiation'],
-                            float(child.get('rad')))
+                            uom.LITE_DRVS['solar_radiation'], float(child.get('rad')))
                     elif child.tag == 'RAIN':
                         if child.get('id') == 'rain0' and rain == 0:
                             rain = 1
@@ -145,9 +144,6 @@ class Controller(polyinterface.Controller):
                                 uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['winddir'], float(child.get('dir')))
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['windchill'],
-                                float(child.get('chill')))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
