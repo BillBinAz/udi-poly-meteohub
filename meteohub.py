@@ -125,7 +125,6 @@ class Controller(polyinterface.Controller):
                             self.nodes['temperature'].setDriver(
                                 uom.TEMP_DRVS['main'], float(child.get('temp')))
                             # humidity under TH
-                            self.nodes['humidity'].nodes.clear()
                             self.nodes['humidity'].setDriver(
                                 uom.HUMD_DRVS['main'], float(child.get('hum')))
                     elif child.tag == 'THB':
