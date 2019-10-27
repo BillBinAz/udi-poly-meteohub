@@ -139,7 +139,8 @@ class Controller(polyinterface.Controller):
                     elif child.tag == 'WIND':
                         if child.get('id') == 'wind0' and wind == 0:
                             wind = 1
-                            self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'], float(child.get('chill')))
+                            self.nodes['temperature'].setDriver(
+                                uom.TEMP_DRVS['windchill'], float(child.get('chill')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['windspeed'], float(child.get('wind')))
                             self.nodes['wind'].setDriver(
