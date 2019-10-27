@@ -95,6 +95,7 @@ class Controller(polyinterface.Controller):
                 rain = 0
                 temperature = 0
                 wind = 0
+                pressure = 0
 
                 # LOGGER.debug('tag = ' + tree.tag)
                 for child in reversed(tree.getchildren()):
