@@ -90,51 +90,66 @@ class Controller(polyinterface.Controller):
             # Parse the XML data
             try:
                 tree = ElementTree.fromstring(content)
+                light = 0
+                sol = 0
+                rain = 0
+                temperature = 0
+                wind = 0
+                pressure = 0
 
                 # LOGGER.debug('tag = ' + tree.tag)
-                for child in tree.getchildren():
+                for child in reversed(tree.getchildren()):
                     # LOGGER.debug('   child = ' + child.tag)
-                    if child.tag == 'UV':
+                    if child.tag == 'UV' and light == 0:
+                        light = 1
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['uv'], float(child.get('index')))
-                    elif child.tag == 'SOL':
+                    elif child.tag == 'SOL' and not sol == 1:
+                        sol = 1
                         # LOGGER.debug('    Solar   = ' + child.get('rad'))
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['solar_radiation'],
                             float(child.get('rad')))
                     elif child.tag == 'RAIN':
-                        if child.get('id') == 'rain0':
+                        if child.get('id') == 'rain0' and rain == 0:
+                            rain = 1
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['rate'], float(child.get('rate')))
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['total'], float(child.get('total')))
                     elif child.tag == 'TH':
-                        if child.get('id') == 'th0':
+                        if child.get('id') == 'th0' and temperature == 0:
+                            temperature = 1
                             self.nodes['temperature'].setDriver(
                                 uom.TEMP_DRVS['dewpoint'],
                                 float(child.get('dew')))
                             self.nodes['temperature'].setDriver(
                                 uom.TEMP_DRVS['main'], float(child.get('temp')))
+                            # humidity under TH
                             self.nodes['humidity'].setDriver(
                                 uom.HUMD_DRVS['main'], float(child.get('hum')))
                     elif child.tag == 'THB':
-                        if child.get('id') == 'thb0':
+                        if child.get('id') == 'thb0' and pressure == 0:
+                            pressure = 1
                             self.nodes['pressure'].setDriver(
                                 uom.PRES_DRVS['station'], float(child.get('press')))
                             self.nodes['pressure'].setDriver(
                                 uom.PRES_DRVS['sealevel'],
                                 float(child.get('seapress')))
                     elif child.tag == 'WIND':
-                        if child.get('id') == 'wind0':
+                        if child.get('id') == 'wind0' and wind == 0:
+                            wind = 1
                             self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['windchill'],
-                                float(child.get('chill')))
+                                uom.TEMP_DRVS['windchill'], float(child.get('chill')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['windspeed'], float(child.get('wind')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['winddir'], float(child.get('dir')))
+                            self.nodes['temperature'].setDriver(
+                                uom.TEMP_DRVS['windchill'],
+                                float(child.get('chill')))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
