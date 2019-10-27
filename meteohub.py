@@ -108,8 +108,7 @@ class Controller(polyinterface.Controller):
                         sol = 1
                         # LOGGER.debug('    Solar   = ' + child.get('rad'))
                         self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['solar_radiation'],
-                            float(child.get('rad')))
+                            uom.LITE_DRVS['solar_radiation'], float(child.get('rad')))
                     elif child.tag == 'RAIN':
                         if child.get('id') == 'rain0' and rain == 0:
                             rain = 1
@@ -121,8 +120,7 @@ class Controller(polyinterface.Controller):
                         if child.get('id') == 'th0' and temperature == 0:
                             temperature = 1
                             self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['dewpoint'],
-                                float(child.get('dew')))
+                                uom.TEMP_DRVS['dewpoint'], float(child.get('dew')))
                             self.nodes['temperature'].setDriver(
                                 uom.TEMP_DRVS['main'], float(child.get('temp')))
                             # humidity under TH
@@ -134,8 +132,7 @@ class Controller(polyinterface.Controller):
                             self.nodes['pressure'].setDriver(
                                 uom.PRES_DRVS['station'], float(child.get('press')))
                             self.nodes['pressure'].setDriver(
-                                uom.PRES_DRVS['sealevel'],
-                                float(child.get('seapress')))
+                                uom.PRES_DRVS['sealevel'], float(child.get('seapress')))
                     elif child.tag == 'WIND':
                         if child.get('id') == 'wind0' and wind == 0:
                             wind = 1
@@ -147,9 +144,6 @@ class Controller(polyinterface.Controller):
                                 uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['winddir'], float(child.get('dir')))
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['windchill'],
-                                float(child.get('chill')))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
