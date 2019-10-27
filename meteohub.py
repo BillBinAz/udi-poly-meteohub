@@ -145,6 +145,9 @@ class Controller(polyinterface.Controller):
                                 uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['winddir'], float(child.get('dir')))
+                            self.nodes['temperature'].setDriver(
+                                uom.TEMP_DRVS['windchill'],
+                                float(child.get('chill')))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
