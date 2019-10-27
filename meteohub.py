@@ -99,7 +99,7 @@ class Controller(polyinterface.Controller):
                 # LOGGER.debug('tag = ' + tree.tag)
                 for child in reversed(tree.getchildren()):
                     # LOGGER.debug('   child = ' + child.tag)
-                    if child.tag == 'UV' and not light == 1:
+                    if child.tag == 'UV' and light == 0:
                         light = 1
                         self.nodes['light'].setDriver(
                             uom.LITE_DRVS['uv'], float(child.get('index')))
@@ -110,14 +110,14 @@ class Controller(polyinterface.Controller):
                             uom.LITE_DRVS['solar_radiation'],
                             float(child.get('rad')))
                     elif child.tag == 'RAIN':
-                        if child.get('id') == 'rain0' and not rain == 1:
+                        if child.get('id') == 'rain0' and rain == 0:
                             rain = 1
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['rate'], float(child.get('rate')))
                             self.nodes['rain'].setDriver(
                                 uom.RAIN_DRVS['total'], float(child.get('total')))
                     elif child.tag == 'TH':
-                        if child.get('id') == 'th0' and not temperature == 1:
+                        if child.get('id') == 'th0' and temperature == 0:
                             temperature = 1
                             self.nodes['temperature'].setDriver(
                                 uom.TEMP_DRVS['dewpoint'],
@@ -129,7 +129,7 @@ class Controller(polyinterface.Controller):
                             self.nodes['humidity'].setDriver(
                                 uom.HUMD_DRVS['main'], float(child.get('hum')))
                     elif child.tag == 'THB':
-                        if child.get('id') == 'thb0' and not pressure == 1:
+                        if child.get('id') == 'thb0' and pressure == 0:
                             pressure = 1
                             self.nodes['pressure'].setDriver(
                                 uom.PRES_DRVS['station'], float(child.get('press')))
@@ -137,9 +137,8 @@ class Controller(polyinterface.Controller):
                                 uom.PRES_DRVS['sealevel'],
                                 float(child.get('seapress')))
                     elif child.tag == 'WIND':
-                        if child.get('id') == 'wind0' and not wind == 1:
+                        if child.get('id') == 'wind0' and wind == 0:
                             wind = 1
-                            self.nodes['wind'].nodes.clear()
                             self.nodes['wind'].setDriver(
                                 uom.WIND_DRVS['windspeed'], float(child.get('wind')))
                             self.nodes['wind'].setDriver(
