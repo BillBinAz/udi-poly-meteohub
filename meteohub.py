@@ -252,7 +252,7 @@ class Controller(polyinterface.Controller):
 
         # Make sure they are in the params  -- does this cause a
         # configuration event?
-        LOGGER.info("Adding configuation")
+        LOGGER.info("Adding configuration")
         self.addCustomParam({
             'IPAddress': self.ip,
             'Units': self.units,
