@@ -36,7 +36,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         try:
             os.makedirs("profile/nodedef")
         except:
-            LOGGER.error('unable to create node definition directory.')
+            logger.error('unable to create node definition directory.')
 
     nodedef = open("profile/nodedef/nodedefs.xml", "w")
     nodedef.write("<nodeDefs>\n")
@@ -100,7 +100,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(light_list) > 0):
+    if len(light_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('light', '139L'))
         nodedef.write("    <sts>\n")
         for t in light_list:
@@ -108,7 +108,7 @@ def write_profile(logger, temperature_list, humidity_list, pressure_list,
         nodedef.write("    </sts>\n")
         nodedef.write("  </nodeDef>\n")
 
-    if (len(lightning_list) > 0):
+    if len(lightning_list) > 0:
         nodedef.write(NODEDEF_TMPL % ('lightning', '139S'))
         nodedef.write("    <sts>\n")
         for t in lightning_list:
@@ -196,7 +196,7 @@ if __name__ == "__main__":
         level=10,
         format='%(levelname)s:\t%(name)s\t%(message)s'
     )
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.ERROR)
 
     # Test dictionaries to generate a custom nodedef file.
     tl = {'main': 'I_TEMP_F', 'dewpoint': 'I_TEMP_F', 'apparent': 'I_TEMP_F',
@@ -217,9 +217,9 @@ if __name__ == "__main__":
                 local_version = vfile.readline()
                 local_version = local_version.rstrip()
                 vfile.close()
-        except (FileNotFoundError):
+        except FileNotFoundError:
             pass
-        except (Exception) as err:
+        except Exception as err:
             logger.error('{0} failed to read local version from {1}: {2}'.format(pfx,
                                                                                  VERSION_FILE,
                                                                                  err),
