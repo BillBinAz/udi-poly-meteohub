@@ -24,6 +24,10 @@ def convert_to_float(value):
         return 0
 
 
+def f_to_c(value):
+    return (value - 32) * 5.0 / 9.0
+
+
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
@@ -114,11 +118,11 @@ class Controller(polyinterface.Controller):
                 #
                 # Temperature
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'],
-                                                    convert_to_float(wifi_logger_data["dew"]))
+                                                    f_to_c(convert_to_float(wifi_logger_data["dew"])))
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'],
-                                                    convert_to_float(wifi_logger_data["tempout"]))
+                                                    f_to_c(convert_to_float(wifi_logger_data["tempout"])))
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'],
-                                                    convert_to_float(wifi_logger_data["chill"]))
+                                                    f_to_c(convert_to_float(wifi_logger_data["chill"])))
 
                 #
                 # Humidity
