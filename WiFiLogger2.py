@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Polyglot v2 node server for MeteoHub
+Polyglot v2 node server for WiFiLogger2
 """
 import datetime
-import xml.etree.ElementTree as ElementTree
+import json
 
 import httplib2
 import math
@@ -51,16 +51,30 @@ class Controller(polyinterface.Controller):
 
                 # Add notices about missing configuration
                 if self.ip == "":
-                    self.addNotice("IP/Host address of the MeteoHub device is required.")
+                    self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
 
     def start(self):
-        LOGGER.info('Starting MeteoHub Node Server')
+        LOGGER.info('Starting WiFiLogger2 Node Server')
         self.check_params()
         self.discover()
-        LOGGER.info('MeteoHub Node Server Started.')
+        LOGGER.info('WiFiLogger2 Node Server Started.')
 
     def shortPoll(self):
         pass
+
+    def get_data(self):
+        #
+        # Get the latest data
+        url = "http://" + self.ip + "/wflexp.json"
+
+        #
+        # Pull the data
+        h = httplib2.Http()
+        resp, content = h.request(url, "GET")
+        if resp.status != 200:
+            syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
+            print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
+        return json.loads(content)
 
     def longPoll(self):
         # http get and read data
@@ -71,85 +85,48 @@ class Controller(polyinterface.Controller):
 
         try:
             #
-            # get the last 5 minutes worth of data
-            date = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
-            url = "http://" + self.ip + "/meteolog.cgi?type=xml&quotes=1&mode=data&start=" + date.strftime(
-                "%Y%m%d%H%M%S")
+            # Get the latest data
+            wifi_logger_data = self.get_data()
 
-            #
-            # Pull the XML from meteohub
-            h = httplib2.Http()
-            resp, content = h.request(url, "GET")
-            if resp.status != 200:
-                syslog.syslog(syslog.LOG_INFO,
-                              "Bad response from meteohub " + str(resp))
-                print(datetime.datetime.now().time(),
-                      " -  Bad response from meteohub. " + str(resp))
-                LOGGER.debug(content)
-
-            # Parse the XML data
             try:
-                tree = ElementTree.fromstring(content)
-                light = 0
-                sol = 0
-                rain = 0
-                temperature = 0
-                wind = 0
-                pressure = 0
+                # Parse the JSON data
 
-                # LOGGER.debug('tag = ' + tree.tag)
-                for child in reversed(tree.getchildren()):
-                    # LOGGER.debug('   child = ' + child.tag)
-                    if child.tag == 'UV' and light == 0:
-                        light = 1
-                        self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['uv'], float(child.get('index')))
-                    elif child.tag == 'SOL' and not sol == 1:
-                        sol = 1
-                        # LOGGER.debug('    Solar   = ' + child.get('rad'))
-                        self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['solar_radiation'], float(child.get('rad')))
-                    elif child.tag == 'RAIN':
-                        if child.get('id') == 'rain0' and rain == 0:
-                            rain = 1
-                            self.nodes['rain'].setDriver(
-                                uom.RAIN_DRVS['rate'], float(child.get('rate')))
-                            self.nodes['rain'].setDriver(
-                                uom.RAIN_DRVS['total'], float(child.get('total')))
-                    elif child.tag == 'TH':
-                        if child.get('id') == 'th0' and temperature == 0:
-                            temperature = 1
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['dewpoint'], float(child.get('dew')))
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['main'], float(child.get('temp')))
-                            # humidity under TH
-                            self.nodes['humidity'].setDriver(
-                                uom.HUMD_DRVS['main'], float(child.get('hum')))
-                    elif child.tag == 'THB':
-                        if child.get('id') == 'thb0' and pressure == 0:
-                            pressure = 1
-                            self.nodes['pressure'].setDriver(
-                                uom.PRES_DRVS['station'], float(child.get('press')))
-                            self.nodes['pressure'].setDriver(
-                                uom.PRES_DRVS['sealevel'], float(child.get('seapress')))
-                    elif child.tag == 'WIND':
-                        if child.get('id') == 'wind0' and wind == 0:
-                            wind = 1
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['windchill'], float(child.get('chill')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['windspeed'], float(child.get('wind')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['winddir'], float(child.get('dir')))
+                #
+                # Light
+                self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], float(wifi_logger_data["uv"]))
+                self.nodes['light'].setDriver(uom.LITE_DRVS['solar_radiation'], float(wifi_logger_data["solar"]))
+
+                #
+                # Rain
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['rate'], float(wifi_logger_data["rainr"]))
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['total'], float(wifi_logger_data["rain24"]))
+
+                #
+                # Temperature
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'], float(wifi_logger_data["dew"]))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'], float(wifi_logger_data["tempout"]))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'], float(wifi_logger_data["chill"]))
+
+                #
+                # Humidity
+                self.nodes['humidity'].setDriver(uom.HUMD_DRVS['main'], float(wifi_logger_data["humout"]))
+
+                #
+                # Pressure
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], float(wifi_logger_data["bar"]))
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], float(wifi_logger_data["bartr"]))
+
+                #
+                # Wind
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['windspeed'], float(wifi_logger_data["windspd"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['gustspeed'], float(wifi_logger_data["gust"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'], float(wifi_logger_data["winddir"]))
 
             except Exception as e:
-                LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
+                LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
 
         except Exception as e:
-            LOGGER.error("Failure trying to connect to MeteoHub device. " + str(e))
+            LOGGER.error("Failure trying to connect to WiFiLogger2 device. " + str(e))
 
     def query(self):
 
@@ -240,11 +217,11 @@ class Controller(polyinterface.Controller):
 
     def delete(self):
         self.stopping = True
-        LOGGER.info('Removing MeteoHub node server.')
+        LOGGER.info('Removing WiFiLogger2 node server.')
 
     def stop(self):
         self.stopping = True
-        LOGGER.debug('Stopping MeteoHub node server.')
+        LOGGER.debug('Stopping WiFiLogger2 node server.')
 
     def check_params(self):
         self.set_configuration(self.polyConfig)
@@ -266,7 +243,7 @@ class Controller(polyinterface.Controller):
 
         # Add a notice?
         if self.ip == "":
-            self.addNotice("IP/Host address of the MeteoHub device is required.")
+            self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
 
     def set_configuration(self, config):
         default_ip = ""
