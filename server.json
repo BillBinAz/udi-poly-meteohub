@@ -2,7 +2,7 @@
   "name": "MeteoHub",
   "docs": "",
   "type": "python3",
-  "executable": "meteohub.py",
+  "executable": "WiFiLogger2.py",
   "install": "install.sh",
   "description": "Add weather data from MeteoHub to the ISY994",
   "notice": "see http://www.MeteoHub.com for more information",
