@@ -66,6 +66,7 @@ class Controller(polyinterface.Controller):
         #
         # Get the latest data
         url = "http://" + self.ip + "/wflexp.json"
+        print(url)
 
         #
         # Pull the data
