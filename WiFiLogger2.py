@@ -87,6 +87,7 @@ class Controller(polyinterface.Controller):
             print(e)
             print(datetime.datetime.now().time(),
                   " - unable to format to float name: " + str(logger_name) + " Value: \"" + data + "\"")
+            print(e)
 
     def longPoll(self):
         # http get and read data
