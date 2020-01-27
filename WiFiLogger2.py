@@ -79,7 +79,7 @@ class Controller(polyinterface.Controller):
 
     def add_to_uom(self, wifi_logger_data, node_name, driver_name, logger_name):
         try:
-            self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], float(wifi_logger_data[logger_name]))
+            self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], wifi_logger_data[logger_name])
 
         except Exception as e:
             print(datetime.datetime.now().time(),
