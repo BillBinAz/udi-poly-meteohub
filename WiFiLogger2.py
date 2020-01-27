@@ -92,7 +92,7 @@ class Controller(polyinterface.Controller):
 
             try:
                 # Parse the JSON data
-                wifi_logger_data = json.load(content)
+                wifi_logger_data = json.loads(content)
                 #
                 # Light
                 self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], float(wifi_logger_data["uv"]))
