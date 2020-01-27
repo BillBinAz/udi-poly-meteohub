@@ -66,7 +66,6 @@ class Controller(polyinterface.Controller):
         #
         # Get the latest data
         url = "http://" + self.ip + "/wflexp.json"
-        print(url)
 
         #
         # Pull the data
@@ -75,8 +74,8 @@ class Controller(polyinterface.Controller):
         if resp.status != 200:
             syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
             print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
-        print(content)
-        return json.loads(content)
+
+        return json.loads(str(content))
 
     def longPoll(self):
         # http get and read data
