@@ -31,7 +31,7 @@ class Controller(polyinterface.Controller):
         self.address = 'bb_meteohub'
         self.primary = self.address
         self.ip = ""
-        self.units = "us"
+        self.units = 'us'
         self.temperature_list = {}
         self.humidity_list = {}
         self.pressure_list = {}
