@@ -77,6 +77,12 @@ class Controller(polyinterface.Controller):
 
         return json.loads(content.decode('utf-8'))
 
+    def convert_to_float(self, value):
+        try:
+            return float(value)
+        except:
+            return 0
+
     def longPoll(self):
         # http get and read data
         if self.ip == "":
