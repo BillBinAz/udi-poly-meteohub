@@ -79,11 +79,12 @@ class Controller(polyinterface.Controller):
 
     def add_to_uom(self, wifi_logger_data, node_name, driver_name, logger_name):
         try:
-            # data = wifi_logger_data[logger_name]
-            data = "55.55"
+            data = wifi_logger_data[logger_name]
+            # data = "55.55"
             self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], float(data))
 
         except Exception as e:
+            print(e)
             print(datetime.datetime.now().time(),
                   " - unable to format to float name: " + str(logger_name) + " Value: \"" + data + "\"")
 
