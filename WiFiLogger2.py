@@ -127,9 +127,9 @@ class Controller(polyinterface.Controller):
 
                 #
                 # Wind
-                # self.add_to_uom(wifi_logger_data, 'wind', 'windspeed', 'windspd')
-                # self.add_to_uom(wifi_logger_data, 'wind', 'gustspeed', 'gust')
-                # self.add_to_uom(wifi_logger_data, 'wind', 'winddir', 'winddir')
+                self.add_to_uom(wifi_logger_data, 'wind', 'windspeed', 'windspd')
+                self.add_to_uom(wifi_logger_data, 'wind', 'gustspeed', 'gust')
+                self.add_to_uom(wifi_logger_data, 'wind', 'winddir', 'winddir')
 
             except Exception as e:
                 LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
