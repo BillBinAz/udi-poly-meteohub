@@ -83,8 +83,8 @@ class Controller(polyinterface.Controller):
 
         except Exception as e:
             print(datetime.datetime.now().time(),
-                  " - unable to format to float name: " + str(logger_name) + " Value: " + wifi_logger_data[
-                      logger_name])
+                  " - unable to format to float name: " + str(logger_name) + " Value: \"" + wifi_logger_data[
+                      logger_name] + "\"")
 
     def longPoll(self):
         # http get and read data
