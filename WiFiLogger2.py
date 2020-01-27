@@ -75,7 +75,7 @@ class Controller(polyinterface.Controller):
             syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
             print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
 
-        return content
+        return json.loads(content.decode('utf-8'))
 
     def longPoll(self):
         # http get and read data
@@ -88,11 +88,10 @@ class Controller(polyinterface.Controller):
         try:
             #
             # Get the latest data
-            content = self.get_data()
+            wifi_logger_data = self.get_data()
 
             try:
                 # Parse the JSON data
-                wifi_logger_data = json.loads(content)
                 #
                 # Light
                 self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], float(wifi_logger_data["uv"]))
