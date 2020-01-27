@@ -77,17 +77,13 @@ class Controller(polyinterface.Controller):
 
         return json.loads(content.decode('utf-8'))
 
-    def add_to_uom(self, wifi_logger_data, node_name, driver_name, logger_name):
+    def add_to_uom(self, json_data, node_name, driver_name, logger_name):
         try:
-            data = wifi_logger_data[logger_name]
-            # data = "55.55"
-            self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], float(data))
+            self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], float(json_data[logger_name]))
 
         except Exception as e:
-            print(e)
             print(datetime.datetime.now().time(),
-                  " - unable to format to float name: " + str(logger_name) + " Value: \"" + data + "\"")
-            print(e)
+                  " - unable to add Name: " + str(logger_name) + " Value: \"" + data + "\" Exception: " + e)
 
     def longPoll(self):
         # http get and read data
@@ -131,9 +127,9 @@ class Controller(polyinterface.Controller):
 
                 #
                 # Wind
-                self.add_to_uom(wifi_logger_data, 'wind', 'windspeed', 'windspd')
-                self.add_to_uom(wifi_logger_data, 'wind', 'gustspeed', 'gust')
-                self.add_to_uom(wifi_logger_data, 'wind', 'winddir', 'winddir')
+                # self.add_to_uom(wifi_logger_data, 'wind', 'windspeed', 'windspd')
+                # self.add_to_uom(wifi_logger_data, 'wind', 'gustspeed', 'gust')
+                # self.add_to_uom(wifi_logger_data, 'wind', 'winddir', 'winddir')
 
             except Exception as e:
                 LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
