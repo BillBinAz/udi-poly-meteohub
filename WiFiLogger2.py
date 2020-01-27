@@ -77,14 +77,6 @@ class Controller(polyinterface.Controller):
 
         return json.loads(content.decode('utf-8'))
 
-    def add_to_uom(self, json_data, node_name, driver_name, logger_name):
-        try:
-            self.nodes[node_name].setDriver(uom.LITE_DRVS[driver_name], float(json_data[logger_name]))
-
-        except Exception as e:
-            print(datetime.datetime.now().time(),
-                  " - unable to add Name: " + str(logger_name) + " Value: \"" + data + "\" Exception: " + e)
-
     def longPoll(self):
         # http get and read data
         if self.ip == "":
@@ -100,36 +92,37 @@ class Controller(polyinterface.Controller):
 
             try:
                 # Parse the JSON data
+
                 #
                 # Light
-                self.add_to_uom(wifi_logger_data, 'light', 'uv', 'uv')
-                self.add_to_uom(wifi_logger_data, 'light', 'solar_radiation', 'solar')
+                self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], float(wifi_logger_data["uv"]))
+                self.nodes['light'].setDriver(uom.LITE_DRVS['solar_radiation'], float(wifi_logger_data["solar"]))
 
                 #
                 # Rain
-                self.add_to_uom(wifi_logger_data, 'rain', 'rate', 'rainr')
-                self.add_to_uom(wifi_logger_data, 'rain', 'total', 'rain24')
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['rate'], float(wifi_logger_data["rainr"]))
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['total'], float(wifi_logger_data["rain24"]))
 
                 #
                 # Temperature
-                self.add_to_uom(wifi_logger_data, 'temperature', 'dewpoint', 'dew')
-                self.add_to_uom(wifi_logger_data, 'temperature', 'main', 'tempout')
-                self.add_to_uom(wifi_logger_data, 'temperature', 'windchill', 'chill')
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'], float(wifi_logger_data["dew"]))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'], float(wifi_logger_data["tempout"]))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'], float(wifi_logger_data["chill"]))
 
                 #
                 # Humidity
-                self.add_to_uom(wifi_logger_data, 'humidity', 'main', 'humout')
+                self.nodes['humidity'].setDriver(uom.HUMD_DRVS['main'], float(wifi_logger_data["humout"]))
 
                 #
                 # Pressure
-                self.add_to_uom(wifi_logger_data, 'pressure', 'station', 'bar')
-                self.add_to_uom(wifi_logger_data, 'pressure', 'sealevel', 'bartr')
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], float(wifi_logger_data["bar"]))
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], float(wifi_logger_data["bartr"]))
 
                 #
                 # Wind
-                self.add_to_uom(wifi_logger_data, 'wind', 'windspeed', 'windspd')
-                self.add_to_uom(wifi_logger_data, 'wind', 'gustspeed', 'gust')
-                self.add_to_uom(wifi_logger_data, 'wind', 'winddir', 'winddir')
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['windspeed'], float(wifi_logger_data["windspd"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['gustspeed'], float(wifi_logger_data["gust"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'], float(wifi_logger_data["winddir"]))
 
             except Exception as e:
                 LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
