@@ -74,11 +74,13 @@ class Controller(polyinterface.Controller):
         if resp.status != 200:
             syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
             print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
+        print(content)
         return json.loads(content)
 
     def longPoll(self):
         # http get and read data
         if self.ip == "":
+            print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
             return
 
         LOGGER.info("LongPoll")
