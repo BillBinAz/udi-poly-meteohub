@@ -24,10 +24,6 @@ def convert_to_float(value):
         return 0
 
 
-def convert_f_to_c(value):
-    return (value - 32) * 5 / 9
-
-
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
@@ -35,7 +31,7 @@ class Controller(polyinterface.Controller):
         self.address = 'bb_meteohub'
         self.primary = self.address
         self.ip = ""
-        self.units = ""
+        self.units = "us"
         self.temperature_list = {}
         self.humidity_list = {}
         self.pressure_list = {}
@@ -118,11 +114,11 @@ class Controller(polyinterface.Controller):
                 #
                 # Temperature
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'],
-                                                    convert_f_to_c(convert_to_float(wifi_logger_data["dew"])))
+                                                    convert_to_float(wifi_logger_data["dew"]))
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'],
-                                                    convert_f_to_c(convert_to_float(wifi_logger_data["tempout"])))
+                                                    convert_to_float(wifi_logger_data["tempout"]))
                 self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'],
-                                                    convert_f_to_c(convert_to_float(wifi_logger_data["chill"])))
+                                                    convert_to_float(wifi_logger_data["chill"]))
 
                 #
                 # Humidity
@@ -130,8 +126,8 @@ class Controller(polyinterface.Controller):
 
                 #
                 # Pressure
-                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], convert_to_float(wifi_logger_data["bar"]))
-                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], convert_to_float(wifi_logger_data["bartr"]))
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], convert_to_float(wifi_logger_data["bartr"]))
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], convert_to_float(wifi_logger_data["bar"]))
 
                 #
                 # Wind
