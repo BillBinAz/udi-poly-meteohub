@@ -25,8 +25,8 @@ def convert_to_float(value):
 
 
 def f_to_c(value):
-    return (value - 32) * 5.0 / 9.0
-
+    # return (value - 32) * 5.0 / 9.0
+    return value
 
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
