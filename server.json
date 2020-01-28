@@ -2,7 +2,7 @@
   "name": "MeteoHub",
   "docs": "",
   "type": "python3",
-  "executable": "meteohub.py",
+  "executable": "WiFiLogger2.py",
   "install": "install.sh",
   "description": "Add weather data from MeteoHub to the ISY994",
   "notice": "see http://www.MeteoHub.com for more information",
@@ -13,7 +13,7 @@
     {
       "title": "MeteoHub: Weather Data",
       "author": "Bill Bennett",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "date": "October 10, 2019",
       "source": "https://github.com/bbennett66/udi-poly-meteohub",
       "license": "https://github.com/bbennett66/udi-poly-meteohub/blob/master/LICENSE"

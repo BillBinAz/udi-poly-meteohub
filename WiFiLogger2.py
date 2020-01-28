@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Polyglot v2 node server for MeteoHub
+Polyglot v2 node server for WiFiLogger2
 """
 import datetime
-import xml.etree.ElementTree as ElementTree
+import json
 
 import httplib2
 import math
@@ -17,6 +17,18 @@ import write_profile
 LOGGER = polyinterface.LOGGER
 
 
+def convert_to_float(value):
+    try:
+        return float(value)
+    except:
+        return 0
+
+
+def f_to_c(value):
+    # return (value - 32) * 5.0 / 9.0
+    return value
+
+
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
@@ -24,7 +36,7 @@ class Controller(polyinterface.Controller):
         self.address = 'bb_meteohub'
         self.primary = self.address
         self.ip = ""
-        self.units = ""
+        self.units = 'us'
         self.temperature_list = {}
         self.humidity_list = {}
         self.pressure_list = {}
@@ -51,105 +63,88 @@ class Controller(polyinterface.Controller):
 
                 # Add notices about missing configuration
                 if self.ip == "":
-                    self.addNotice("IP/Host address of the MeteoHub device is required.")
+                    self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
 
     def start(self):
-        LOGGER.info('Starting MeteoHub Node Server')
+        LOGGER.info('Starting WiFiLogger2 Node Server')
         self.check_params()
         self.discover()
-        LOGGER.info('MeteoHub Node Server Started.')
+        LOGGER.info('WiFiLogger2 Node Server Started.')
 
     def shortPoll(self):
         pass
 
+    def get_data(self):
+        #
+        # Get the latest data
+        url = "http://" + self.ip + "/wflexp.json"
+
+        #
+        # Pull the data
+        h = httplib2.Http()
+        resp, content = h.request(url, "GET")
+        if resp.status != 200:
+            syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
+            print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
+
+        return json.loads(content.decode('utf-8'))
+
     def longPoll(self):
         # http get and read data
         if self.ip == "":
+            print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
             return
 
         LOGGER.info("LongPoll")
 
         try:
             #
-            # get the last 5 minutes worth of data
-            date = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
-            url = "http://" + self.ip + "/meteolog.cgi?type=xml&quotes=1&mode=data&start=" + date.strftime(
-                "%Y%m%d%H%M%S")
+            # Get the latest data
+            wifi_logger_data = self.get_data()
 
-            #
-            # Pull the XML from meteohub
-            h = httplib2.Http()
-            resp, content = h.request(url, "GET")
-            if resp.status != 200:
-                syslog.syslog(syslog.LOG_INFO,
-                              "Bad response from meteohub " + str(resp))
-                print(datetime.datetime.now().time(),
-                      " -  Bad response from meteohub. " + str(resp))
-                LOGGER.debug(content)
-
-            # Parse the XML data
             try:
-                tree = ElementTree.fromstring(content)
-                light = 0
-                sol = 0
-                rain = 0
-                temperature = 0
-                wind = 0
-                pressure = 0
+                # Parse the JSON data
 
-                # LOGGER.debug('tag = ' + tree.tag)
-                for child in reversed(tree.getchildren()):
-                    # LOGGER.debug('   child = ' + child.tag)
-                    if child.tag == 'UV' and light == 0:
-                        light = 1
-                        self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['uv'], float(child.get('index')))
-                    elif child.tag == 'SOL' and not sol == 1:
-                        sol = 1
-                        # LOGGER.debug('    Solar   = ' + child.get('rad'))
-                        self.nodes['light'].setDriver(
-                            uom.LITE_DRVS['solar_radiation'], float(child.get('rad')))
-                    elif child.tag == 'RAIN':
-                        if child.get('id') == 'rain0' and rain == 0:
-                            rain = 1
-                            self.nodes['rain'].setDriver(
-                                uom.RAIN_DRVS['rate'], float(child.get('rate')))
-                            self.nodes['rain'].setDriver(
-                                uom.RAIN_DRVS['total'], float(child.get('total')))
-                    elif child.tag == 'TH':
-                        if child.get('id') == 'th0' and temperature == 0:
-                            temperature = 1
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['dewpoint'], float(child.get('dew')))
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['main'], float(child.get('temp')))
-                            # humidity under TH
-                            self.nodes['humidity'].setDriver(
-                                uom.HUMD_DRVS['main'], float(child.get('hum')))
-                    elif child.tag == 'THB':
-                        if child.get('id') == 'thb0' and pressure == 0:
-                            pressure = 1
-                            self.nodes['pressure'].setDriver(
-                                uom.PRES_DRVS['station'], float(child.get('press')))
-                            self.nodes['pressure'].setDriver(
-                                uom.PRES_DRVS['sealevel'], float(child.get('seapress')))
-                    elif child.tag == 'WIND':
-                        if child.get('id') == 'wind0' and wind == 0:
-                            wind = 1
-                            self.nodes['temperature'].setDriver(
-                                uom.TEMP_DRVS['windchill'], float(child.get('chill')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['windspeed'], float(child.get('wind')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['gustspeed'], float(child.get('gust')))
-                            self.nodes['wind'].setDriver(
-                                uom.WIND_DRVS['winddir'], float(child.get('dir')))
+                #
+                # Light
+                self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], convert_to_float(wifi_logger_data["uv"]))
+                self.nodes['light'].setDriver(uom.LITE_DRVS['solar_radiation'],
+                                              convert_to_float(wifi_logger_data["solar"]))
+
+                #
+                # Rain
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['rate'], convert_to_float(wifi_logger_data["rainr"]))
+                self.nodes['rain'].setDriver(uom.RAIN_DRVS['total'], convert_to_float(wifi_logger_data["rain24"]))
+
+                #
+                # Temperature
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'],
+                                                    f_to_c(convert_to_float(wifi_logger_data["dew"])))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'],
+                                                    f_to_c(convert_to_float(wifi_logger_data["tempout"])))
+                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'],
+                                                    f_to_c(convert_to_float(wifi_logger_data["chill"])))
+
+                #
+                # Humidity
+                self.nodes['humidity'].setDriver(uom.HUMD_DRVS['main'], convert_to_float(wifi_logger_data["humout"]))
+
+                #
+                # Pressure
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], convert_to_float(wifi_logger_data["bartr"]))
+                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], convert_to_float(wifi_logger_data["bar"]))
+
+                #
+                # Wind
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['windspeed'], convert_to_float(wifi_logger_data["windspd"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['gustspeed'], convert_to_float(wifi_logger_data["gust"]))
+                self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'], convert_to_float(wifi_logger_data["winddir"]))
 
             except Exception as e:
-                LOGGER.error("Failure while parsing MeteoHub data. " + str(e))
+                LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
 
         except Exception as e:
-            LOGGER.error("Failure trying to connect to MeteoHub device. " + str(e))
+            LOGGER.error("Failure trying to connect to WiFiLogger2 device. " + str(e))
 
     def query(self):
 
@@ -240,11 +235,11 @@ class Controller(polyinterface.Controller):
 
     def delete(self):
         self.stopping = True
-        LOGGER.info('Removing MeteoHub node server.')
+        LOGGER.info('Removing WiFiLogger2 node server.')
 
     def stop(self):
         self.stopping = True
-        LOGGER.debug('Stopping MeteoHub node server.')
+        LOGGER.debug('Stopping WiFiLogger2 node server.')
 
     def check_params(self):
         self.set_configuration(self.polyConfig)
@@ -266,7 +261,7 @@ class Controller(polyinterface.Controller):
 
         # Add a notice?
         if self.ip == "":
-            self.addNotice("IP/Host address of the MeteoHub device is required.")
+            self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
 
     def set_configuration(self, config):
         default_ip = ""
@@ -289,19 +284,17 @@ class Controller(polyinterface.Controller):
     def setup_nodedefs(self, units):
 
         # Configure the units for each node driver
-        self.temperature_list['main'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
-        self.temperature_list[
-            'dewpoint'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
-        self.temperature_list[
-            'windchill'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
+        self.temperature_list['main'] = 'I_TEMP_F'
+        self.temperature_list['dewpoint'] = 'I_TEMP_F'
+        self.temperature_list['windchill'] = 'I_TEMP_F'
         self.humidity_list['main'] = 'I_HUMIDITY'
-        self.pressure_list['station'] = 'I_INHG' if units == 'us' else 'I_MB'
-        self.pressure_list['sealevel'] = 'I_INHG' if units == 'us' else 'I_MB'
-        self.wind_list['windspeed'] = 'I_MPS' if units == 'metric' else 'I_MPH'
-        self.wind_list['gustspeed'] = 'I_MPS' if units == 'metric' else 'I_MPH'
+        self.pressure_list['station'] = 'I_INHG'
+        self.pressure_list['sealevel'] = 'I_INHG'
+        self.wind_list['windspeed'] = 'I_MPH'
+        self.wind_list['gustspeed'] = 'I_MPH'
         self.wind_list['winddir'] = 'I_DEGREE'
-        self.rain_list['rate'] = 'I_MMHR' if units == 'metric' else 'I_INHR'
-        self.rain_list['total'] = 'I_MM' if units == 'metric' else 'I_INCHES'
+        self.rain_list['rate'] = 'I_INHR'
+        self.rain_list['total'] = 'I_INCHES'
         self.light_list['uv'] = 'I_UV'
         self.light_list['solar_radiation'] = 'I_RADIATION'
 
@@ -383,30 +376,8 @@ class TemperatureNode(polyinterface.Node):
         else:
             return t
 
-    def Heatindex(self, t, h):
-        tf = (t * 1.8) + 32
-        c1 = -42.379
-        c2 = 2.04901523
-        c3 = 10.1433127
-        c4 = -0.22475541
-        c5 = -6.83783 * math.pow(10, -3)
-        c6 = -5.481717 * math.pow(10, -2)
-        c7 = 1.22874 * math.pow(10, -3)
-        c8 = 8.5282 * math.pow(10, -4)
-        c9 = -1.99 * math.pow(10, -6)
-
-        hi = (c1 + (c2 * tf) + (c3 * h) + (c4 * tf * h) + (c5 * tf * tf) + (
-            c6 * h * h) + (c7 * tf * tf * h) + (c8 * tf * h * h) + (
-                  c9 * tf * tf * h * h))
-
-        if (tf < 80.0) or (h < 40.0):
-            return t
-        else:
-            return round((hi - 32) / 1.8, 1)
 
     def setDriver(self, driver, value):
-        if (self.units == "us"):
-            value = (value * 1.8) + 32  # convert to F
 
         super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True,
                                                force=True)
@@ -435,45 +406,9 @@ class PressureNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
 
-    # convert station pressure in millibars to sealevel pressure
-    def toSeaLevel(self, station, elevation):
-        i = 287.05
-        a = 9.80665
-        r = 0.0065
-        s = 1013.35  # pressure at sealevel
-        n = 288.15
-
-        l = a / (i * r)
-        c = i * r / a
-        u = math.pow(1 + math.pow(s / station, c) * (r * elevation / n), l)
-
-        return (round((station * u), 3))
-
-    # track pressures in a queue and calculate trend
-    def updateTrend(self, current):
-        t = 0
-        past = 0
-
-        if len(self.mytrend) == 180:
-            past = self.mytrend.pop()
-
-        if self.mytrend != []:
-            past = self.mytrend[0]
-
-        # calculate trend
-        if ((past - current) > 1):
-            t = -1
-        elif ((past - current) < -1):
-            t = 1
-
-        self.mytrend.insert(0, current)
-        return t
-
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
-            value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
 
@@ -487,10 +422,6 @@ class WindNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        if (driver == 'ST' or driver == 'GV1' or driver == 'GV3'):
-            # Metric value is meters/sec (not KPH)
-            if (self.units != 'metric'):
-                value = round(value * 2.23694, 2)
         super(WindNode, self).setDriver(driver, value, report=True, force=True)
 
 
@@ -512,36 +443,7 @@ class PrecipitationNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
 
-    def hourly_accumulation(self, r):
-        current_hour = datetime.datetime.now().hour
-        if (current_hour != self.prev_hour):
-            self.prev_hour = current_hour
-            self.hourly = 0
-
-        self.hourly_rain += r
-        return self.hourly_rain
-
-    def daily_accumulation(self, r):
-        current_day = datetime.datetime.now().day
-        if (current_day != self.prev_day):
-            self.prev_day = current_day
-            self.daily_rain = 0
-
-        self.daily_rain += r
-        return self.daily_rain
-
-    def weekly_accumulation(self, r):
-        current_week = datetime.datetime.now().day
-        if (current_weekday != self.prev_weekday):
-            self.prev_week = current_weekday
-            self.weekly_rain = 0
-
-        self.weekly_rain += r
-        return self.weekly_rain
-
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
-            value = round(value * 0.03937, 2)
         super(PrecipitationNode, self).setDriver(driver, value, report=True,
                                                  force=True)
 
@@ -569,9 +471,6 @@ class LightningNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        if (driver == 'GV0'):
-            if (self.units != 'metric'):
-                value = round(value / 1.609344, 1)
         super(LightningNode, self).setDriver(driver, value, report=True, force=True)
 
 
