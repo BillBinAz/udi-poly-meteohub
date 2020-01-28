@@ -283,19 +283,17 @@ class Controller(polyinterface.Controller):
     def setup_nodedefs(self, units):
 
         # Configure the units for each node driver
-        self.temperature_list['main'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
-        self.temperature_list[
-            'dewpoint'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
-        self.temperature_list[
-            'windchill'] = 'I_TEMP_F' if units == 'us' else 'I_TEMP_C'
+        self.temperature_list['main'] = 'I_TEMP_F'
+        self.temperature_list['dewpoint'] = 'I_TEMP_F'
+        self.temperature_list['windchill'] = 'I_TEMP_F'
         self.humidity_list['main'] = 'I_HUMIDITY'
-        self.pressure_list['station'] = 'I_INHG' if units == 'us' else 'I_MB'
-        self.pressure_list['sealevel'] = 'I_INHG' if units == 'us' else 'I_MB'
-        self.wind_list['windspeed'] = 'I_MPS' if units == 'metric' else 'I_MPH'
-        self.wind_list['gustspeed'] = 'I_MPS' if units == 'metric' else 'I_MPH'
+        self.pressure_list['station'] = 'I_INHG'
+        self.pressure_list['sealevel'] = 'I_INHG'
+        self.wind_list['windspeed'] = 'I_MPH'
+        self.wind_list['gustspeed'] = 'I_MPH'
         self.wind_list['winddir'] = 'I_DEGREE'
-        self.rain_list['rate'] = 'I_MMHR' if units == 'metric' else 'I_INHR'
-        self.rain_list['total'] = 'I_MM' if units == 'metric' else 'I_INCHES'
+        self.rain_list['rate'] = 'I_INHR'
+        self.rain_list['total'] = 'I_INCHES'
         self.light_list['uv'] = 'I_UV'
         self.light_list['solar_radiation'] = 'I_RADIATION'
 
@@ -377,30 +375,8 @@ class TemperatureNode(polyinterface.Node):
         else:
             return t
 
-    def Heatindex(self, t, h):
-        tf = (t * 1.8) + 32
-        c1 = -42.379
-        c2 = 2.04901523
-        c3 = 10.1433127
-        c4 = -0.22475541
-        c5 = -6.83783 * math.pow(10, -3)
-        c6 = -5.481717 * math.pow(10, -2)
-        c7 = 1.22874 * math.pow(10, -3)
-        c8 = 8.5282 * math.pow(10, -4)
-        c9 = -1.99 * math.pow(10, -6)
-
-        hi = (c1 + (c2 * tf) + (c3 * h) + (c4 * tf * h) + (c5 * tf * tf) + (
-            c6 * h * h) + (c7 * tf * tf * h) + (c8 * tf * h * h) + (
-                  c9 * tf * tf * h * h))
-
-        if (tf < 80.0) or (h < 40.0):
-            return t
-        else:
-            return round((hi - 32) / 1.8, 1)
 
     def setDriver(self, driver, value):
-        if (self.units == "us"):
-            value = (value * 1.8) + 32  # convert to F
 
         super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True,
                                                force=True)
@@ -429,45 +405,9 @@ class PressureNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
 
-    # convert station pressure in millibars to sealevel pressure
-    def toSeaLevel(self, station, elevation):
-        i = 287.05
-        a = 9.80665
-        r = 0.0065
-        s = 1013.35  # pressure at sealevel
-        n = 288.15
-
-        l = a / (i * r)
-        c = i * r / a
-        u = math.pow(1 + math.pow(s / station, c) * (r * elevation / n), l)
-
-        return (round((station * u), 3))
-
-    # track pressures in a queue and calculate trend
-    def updateTrend(self, current):
-        t = 0
-        past = 0
-
-        if len(self.mytrend) == 180:
-            past = self.mytrend.pop()
-
-        if self.mytrend != []:
-            past = self.mytrend[0]
-
-        # calculate trend
-        if ((past - current) > 1):
-            t = -1
-        elif ((past - current) < -1):
-            t = 1
-
-        self.mytrend.insert(0, current)
-        return t
-
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
-            value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
 
@@ -481,10 +421,6 @@ class WindNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        if (driver == 'ST' or driver == 'GV1' or driver == 'GV3'):
-            # Metric value is meters/sec (not KPH)
-            if (self.units != 'metric'):
-                value = round(value * 2.23694, 2)
         super(WindNode, self).setDriver(driver, value, report=True, force=True)
 
 
@@ -506,36 +442,7 @@ class PrecipitationNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
 
-    def hourly_accumulation(self, r):
-        current_hour = datetime.datetime.now().hour
-        if (current_hour != self.prev_hour):
-            self.prev_hour = current_hour
-            self.hourly = 0
-
-        self.hourly_rain += r
-        return self.hourly_rain
-
-    def daily_accumulation(self, r):
-        current_day = datetime.datetime.now().day
-        if (current_day != self.prev_day):
-            self.prev_day = current_day
-            self.daily_rain = 0
-
-        self.daily_rain += r
-        return self.daily_rain
-
-    def weekly_accumulation(self, r):
-        current_week = datetime.datetime.now().day
-        if (current_weekday != self.prev_weekday):
-            self.prev_week = current_weekday
-            self.weekly_rain = 0
-
-        self.weekly_rain += r
-        return self.weekly_rain
-
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
-            value = round(value * 0.03937, 2)
         super(PrecipitationNode, self).setDriver(driver, value, report=True,
                                                  force=True)
 
@@ -563,9 +470,6 @@ class LightningNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        if (driver == 'GV0'):
-            if (self.units != 'metric'):
-                value = round(value / 1.609344, 1)
         super(LightningNode, self).setDriver(driver, value, report=True, force=True)
 
 
