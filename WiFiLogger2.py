@@ -49,55 +49,64 @@ class Controller(polyinterface.Controller):
         self.poly.onConfig(self.process_config)
 
     def process_config(self, config):
-        if 'customParams' in config:
-            if config['customParams'] != self.myConfig:
-                # Configuration has changed, we need to handle it
-                LOGGER.info('New configuration, updating configuration')
-                self.set_configuration(config)
-                self.setup_nodedefs(self.units)
-                self.discover()
-                self.myConfig = config['customParams']
+        try:
+            if 'customParams' in config:
+                if config['customParams'] != self.myConfig:
+                    # Configuration has changed, we need to handle it
+                    LOGGER.info('New configuration, updating configuration')
+                    self.set_configuration(config)
+                    self.setup_nodedefs(self.units)
+                    self.discover()
+                    self.myConfig = config['customParams']
 
-                # Remove all existing notices
-                self.removeNoticesAll()
+                    # Remove all existing notices
+                    self.removeNoticesAll()
 
-                # Add notices about missing configuration
-                if self.ip == "":
-                    self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
+                    # Add notices about missing configuration
+                    if self.ip == "":
+                        self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
+        except Exception as e:
+            LOGGER.error("Failure process_config() " + str(e))
 
     def start(self):
-        LOGGER.info('Starting WiFiLogger2 Node Server')
-        self.check_params()
-        self.discover()
-        LOGGER.info('WiFiLogger2 Node Server Started.')
+        try:
+            LOGGER.info('Starting WiFiLogger2 Node Server')
+            self.check_params()
+            self.discover()
+            LOGGER.info('WiFiLogger2 Node Server Started.')
+        except Exception as e:
+            LOGGER.error("Failure start() " + str(e))
 
     def shortPoll(self):
         pass
 
     def get_data(self):
-        #
-        # Get the latest data
-        url = "http://" + self.ip + "/wflexp.json"
+        try:
+            #
+            # Get the latest data
+            url = "http://" + self.ip + "/wflexp.json"
 
-        #
-        # Pull the data
-        h = httplib2.Http()
-        resp, content = h.request(url, "GET")
-        if resp.status != 200:
-            syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
-            print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
+            #
+            # Pull the data
+            h = httplib2.Http()
+            resp, content = h.request(url, "GET")
+            if resp.status != 200:
+                syslog.syslog(syslog.LOG_INFO, "Bad response from WiFiLogger2 " + str(resp))
+                print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
 
-        return json.loads(content.decode('utf-8'))
+            return json.loads(content.decode('utf-8'))
+        except Exception as e:
+            LOGGER.error("Failure get_date() " + str(e))
 
     def longPoll(self):
-        # http get and read data
-        if self.ip == "":
-            print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
-            return
-
-        LOGGER.info("LongPoll")
-
         try:
+            # http get and read data
+            if self.ip == "":
+                print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
+                return
+
+            LOGGER.info("LongPoll")
+
             #
             # Get the latest data
             wifi_logger_data = self.get_data()
@@ -141,15 +150,16 @@ class Controller(polyinterface.Controller):
                 self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'], convert_to_float(wifi_logger_data["winddir"]))
 
             except Exception as e:
-                LOGGER.error("Failure while parsing WiFiLogger2 data. " + str(e))
-
+                LOGGER.error("longPoll::Failure while parsing WiFiLogger2 data. " + str(e))
         except Exception as e:
-            LOGGER.error("Failure trying to connect to WiFiLogger2 device. " + str(e))
+            LOGGER.error("longPoll::Failure trying to connect to WiFiLogger2 device. " + str(e))
 
     def query(self):
-
-        for node in self.nodes:
-            self.nodes[node].reportDrivers()
+        try:
+            for node in self.nodes:
+                self.nodes[node].reportDrivers()
+        except Exception as e:
+            LOGGER.error("Failure query() " + str(e))
 
     def discover(self, *args, **kwargs):
         """
@@ -166,72 +176,75 @@ class Controller(polyinterface.Controller):
         supplied configuration. To that end, we should probably create the
         node, update the driver list, set the units and then add the node.
         """
-        LOGGER.info("Creating nodes.")
-        node = TemperatureNode(self, self.address, 'temperature', 'Temperatures')
-        node.SetUnits(self.units);
-        for d in self.temperature_list:
-            node.drivers.append(
-                {
-                    'driver': uom.TEMP_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.temperature_list[d]]
-                })
-        self.addNode(node)
+        try:
+            LOGGER.info("Creating nodes.")
+            node = TemperatureNode(self, self.address, 'temperature', 'Temperatures')
+            node.SetUnits(self.units);
+            for d in self.temperature_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.TEMP_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.temperature_list[d]]
+                    })
+            self.addNode(node)
 
-        node = HumidityNode(self, self.address, 'humidity', 'Humidity')
-        node.SetUnits(self.units);
-        for d in self.humidity_list:
-            node.drivers.append(
-                {
-                    'driver': uom.HUMD_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.humidity_list[d]]
-                })
-        self.addNode(node)
+            node = HumidityNode(self, self.address, 'humidity', 'Humidity')
+            node.SetUnits(self.units);
+            for d in self.humidity_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.HUMD_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.humidity_list[d]]
+                    })
+            self.addNode(node)
 
-        node = PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
-        node.SetUnits(self.units);
-        for d in self.pressure_list:
-            node.drivers.append(
-                {
-                    'driver': uom.PRES_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.pressure_list[d]]
-                })
-        self.addNode(node)
+            node = PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
+            node.SetUnits(self.units);
+            for d in self.pressure_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.PRES_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.pressure_list[d]]
+                    })
+            self.addNode(node)
 
-        node = WindNode(self, self.address, 'wind', 'Wind')
-        node.SetUnits(self.units);
-        for d in self.wind_list:
-            node.drivers.append(
-                {
-                    'driver': uom.WIND_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.wind_list[d]]
-                })
-        self.addNode(node)
+            node = WindNode(self, self.address, 'wind', 'Wind')
+            node.SetUnits(self.units);
+            for d in self.wind_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.WIND_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.wind_list[d]]
+                    })
+            self.addNode(node)
 
-        node = PrecipitationNode(self, self.address, 'rain', 'Precipitation')
-        node.SetUnits(self.units);
-        for d in self.rain_list:
-            node.drivers.append(
-                {
-                    'driver': uom.RAIN_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.rain_list[d]]
-                })
-        self.addNode(node)
+            node = PrecipitationNode(self, self.address, 'rain', 'Precipitation')
+            node.SetUnits(self.units);
+            for d in self.rain_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.RAIN_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.rain_list[d]]
+                    })
+            self.addNode(node)
 
-        node = LightNode(self, self.address, 'light', 'Illumination')
-        node.SetUnits(self.units);
-        for d in self.light_list:
-            node.drivers.append(
-                {
-                    'driver': uom.LITE_DRVS[d],
-                    'value': 0,
-                    'uom': uom.UOM[self.light_list[d]]
-                })
-        self.addNode(node)
+            node = LightNode(self, self.address, 'light', 'Illumination')
+            node.SetUnits(self.units);
+            for d in self.light_list:
+                node.drivers.append(
+                    {
+                        'driver': uom.LITE_DRVS[d],
+                        'value': 0,
+                        'uom': uom.UOM[self.light_list[d]]
+                    })
+            self.addNode(node)
+        except Exception as e:
+            LOGGER.error("Failure discover() " + str(e))
 
     def delete(self):
         self.stopping = True
@@ -242,80 +255,83 @@ class Controller(polyinterface.Controller):
         LOGGER.debug('Stopping WiFiLogger2 node server.')
 
     def check_params(self):
-        self.set_configuration(self.polyConfig)
-        self.setup_nodedefs(self.units)
+        try:
+            self.set_configuration(self.polyConfig)
+            self.setup_nodedefs(self.units)
 
-        # Make sure they are in the params  -- does this cause a
-        # configuration event?
-        LOGGER.info("Adding configuration")
-        self.addCustomParam({
-            'IPAddress': self.ip,
-            'Units': self.units,
-        })
+            # Make sure they are in the params  -- does this cause a
+            # configuration event?
+            LOGGER.info("Adding configuration")
+            self.addCustomParam({
+                'IPAddress': self.ip,
+                'Units': self.units,
+            })
 
-        self.myConfig = self.polyConfig['customParams']
+            self.myConfig = self.polyConfig['customParams']
 
-        # Remove all existing notices
-        LOGGER.info("remove all notices")
-        self.removeNoticesAll()
+            # Remove all existing notices
+            LOGGER.info("remove all notices")
+            self.removeNoticesAll()
 
-        # Add a notice?
-        if self.ip == "":
-            self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
+            # Add a notice?
+            if self.ip == "":
+                self.addNotice("IP/Host address of the WiFiLogger2 device is required.")
+
+        except Exception as e:
+            LOGGER.error("Failure check_params() " + str(e))
 
     def set_configuration(self, config):
-        default_ip = ""
-        default_elevation = 0
+        try:
+            default_elevation = 0
 
-        LOGGER.info("Check for existing configuration value")
+            LOGGER.info("Check for existing configuration value")
 
-        if 'IPAddress' in config['customParams']:
             self.ip = config['customParams']['IPAddress']
-        else:
-            self.ip = default_ip
-
-        if 'Units' in config['customParams']:
-            self.units = config['customParams']['Units']
-        else:
             self.units = 'us'
-
+        except Exception as e:
+            LOGGER.error("Failure set_configuration() " + str(e))
         return self.units
 
     def setup_nodedefs(self, units):
-
-        # Configure the units for each node driver
-        self.temperature_list['main'] = 'I_TEMP_F'
-        self.temperature_list['dewpoint'] = 'I_TEMP_F'
-        self.temperature_list['windchill'] = 'I_TEMP_F'
-        self.humidity_list['main'] = 'I_HUMIDITY'
-        self.pressure_list['station'] = 'I_INHG'
-        self.pressure_list['sealevel'] = 'I_INHG'
-        self.wind_list['windspeed'] = 'I_MPH'
-        self.wind_list['gustspeed'] = 'I_MPH'
-        self.wind_list['winddir'] = 'I_DEGREE'
-        self.rain_list['rate'] = 'I_INHR'
-        self.rain_list['total'] = 'I_INCHES'
-        self.light_list['uv'] = 'I_UV'
-        self.light_list['solar_radiation'] = 'I_RADIATION'
-
-        # Build the node definition
-        LOGGER.info('Creating node definition profile based on config.')
-        write_profile.write_profile(LOGGER, self.temperature_list,
-                                    self.humidity_list, self.pressure_list,
-                                    self.wind_list,
-                                    self.rain_list, self.light_list,
-                                    self.lightning_list)
-
-        # push updated profile to ISY
         try:
-            self.poly.installprofile()
-        except:
-            LOGGER.error('Failed up push profile to ISY')
+            # Configure the units for each node driver
+            self.temperature_list['main'] = 'I_TEMP_F'
+            self.temperature_list['dewpoint'] = 'I_TEMP_F'
+            self.temperature_list['windchill'] = 'I_TEMP_F'
+            self.humidity_list['main'] = 'I_HUMIDITY'
+            self.pressure_list['station'] = 'I_INHG'
+            self.pressure_list['sealevel'] = 'I_INHG'
+            self.wind_list['windspeed'] = 'I_MPH'
+            self.wind_list['gustspeed'] = 'I_MPH'
+            self.wind_list['winddir'] = 'I_DEGREE'
+            self.rain_list['rate'] = 'I_INHR'
+            self.rain_list['total'] = 'I_INCHES'
+            self.light_list['uv'] = 'I_UV'
+            self.light_list['solar_radiation'] = 'I_RADIATION'
+
+            # Build the node definition
+            LOGGER.info('Creating node definition profile based on config.')
+            write_profile.write_profile(LOGGER, self.temperature_list,
+                                        self.humidity_list, self.pressure_list,
+                                        self.wind_list,
+                                        self.rain_list, self.light_list,
+                                        self.lightning_list)
+
+            # push updated profile to ISY
+            try:
+                self.poly.installprofile()
+            except Exception as e:
+                LOGGER.error("setup_nodedefs::Failed up push profile to ISY " + str(e))
+        except Exception as e:
+            LOGGER.error("Failure setup_nodedefs() " + str(e))
 
     def remove_notices_all(self, command):
-        LOGGER.info('remove_notices_all:')
-        # Remove all existing notices
-        self.removeNoticesAll()
+        try:
+            LOGGER.info('remove_notices_all:')
+            # Remove all existing notices
+            self.removeNoticesAll()
+        except Exception as e:
+            LOGGER.error("Failure remove_notices_all() " + str(e))
 
     def update_profile(self, command):
         st = self.poly.installprofile()
@@ -352,35 +368,47 @@ class TemperatureNode(polyinterface.Node):
         self.units = u
 
     def Dewpoint(self, t, h):
-        b = (17.625 * t) / (243.04 + t)
-        rh = h / 100.0
-        c = math.log(rh)
-        dewpt = (243.04 * (c + b)) / (17.625 - c - b)
-        return round(dewpt, 1)
+        try:
+            b = (17.625 * t) / (243.04 + t)
+            rh = h / 100.0
+            c = math.log(rh)
+            dewpt = (243.04 * (c + b)) / (17.625 - c - b)
+            return round(dewpt, 1)
+        except Exception as e:
+            LOGGER.error("Failure Dewpoint() " + str(e))
+            return -1
 
     def ApparentTemp(self, t, ws, h):
-        wv = h / 100.0 * 6.105 * math.exp(17.27 * t / (237.7 + t))
-        at = t + (0.33 * wv) - (0.70 * ws) - 4.0
-        return round(at, 1)
+        try:
+            wv = h / 100.0 * 6.105 * math.exp(17.27 * t / (237.7 + t))
+            at = t + (0.33 * wv) - (0.70 * ws) - 4.0
+            return round(at, 1)
+        except Exception as e:
+            LOGGER.error("Failure ApparentTemp() " + str(e))
+            return -1
 
     def Windchill(self, t, ws):
-        # really need temp in F and speed in MPH
-        tf = (t * 1.8) + 32
-        mph = ws / 0.44704
+        try:
+            # really need temp in F and speed in MPH
+            tf = (t * 1.8) + 32
+            mph = ws / 0.44704
 
-        wc = 35.74 + (0.6215 * tf) - (35.75 * math.pow(mph, 0.16)) + (
-            0.4275 * tf * math.pow(mph, 0.16))
+            wc = 35.74 + (0.6215 * tf) - (35.75 * math.pow(mph, 0.16)) + (
+                0.4275 * tf * math.pow(mph, 0.16))
 
-        if (tf <= 50.0) and (mph >= 5.0):
-            return round((wc - 32) / 1.8, 1)
-        else:
-            return t
-
+            if (tf <= 50.0) and (mph >= 5.0):
+                return round((wc - 32) / 1.8, 1)
+            else:
+                return t
+        except Exception as e:
+            LOGGER.error("Failure Windchill() " + str(e))
+            return -1
 
     def setDriver(self, driver, value):
-
-        super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True,
-                                               force=True)
+        try:
+            super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 
 class HumidityNode(polyinterface.Node):
@@ -393,7 +421,10 @@ class HumidityNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        super(HumidityNode, self).setDriver(driver, value, report=True, force=True)
+        try:
+            super(HumidityNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 
 class PressureNode(polyinterface.Node):
@@ -409,8 +440,10 @@ class PressureNode(polyinterface.Node):
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        super(PressureNode, self).setDriver(driver, value, report=True, force=True)
-
+        try:
+            super(PressureNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 class WindNode(polyinterface.Node):
     id = 'wind'
@@ -422,8 +455,10 @@ class WindNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        super(WindNode, self).setDriver(driver, value, report=True, force=True)
-
+        try:
+            super(WindNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 class PrecipitationNode(polyinterface.Node):
     id = 'precipitation'
@@ -444,8 +479,10 @@ class PrecipitationNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        super(PrecipitationNode, self).setDriver(driver, value, report=True,
-                                                 force=True)
+        try:
+            super(PrecipitationNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 
 class LightNode(polyinterface.Node):
@@ -458,7 +495,10 @@ class LightNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        super(LightNode, self).setDriver(driver, value, report=True, force=True)
+        try:
+            super(LightNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 
 class LightningNode(polyinterface.Node):
@@ -471,7 +511,10 @@ class LightningNode(polyinterface.Node):
         self.units = u
 
     def setDriver(self, driver, value):
-        super(LightningNode, self).setDriver(driver, value, report=True, force=True)
+        try:
+            super(LightningNode, self).setDriver(driver, value, report=True, force=True)
+        except Exception as e:
+            LOGGER.error("Failure setDriver() " + str(e))
 
 
 if __name__ == "__main__":
@@ -497,3 +540,5 @@ if __name__ == "__main__":
         """
         Catch SIGTERM or Control-C and exit cleanly.
         """
+    except Exception as e:
+        LOGGER.error("Failure __main__() " + str(e))
