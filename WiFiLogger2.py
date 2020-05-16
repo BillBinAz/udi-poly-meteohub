@@ -151,8 +151,8 @@ class Controller(polyinterface.Controller):
 
             except Exception as e:
                 LOGGER.error("longPoll::Failure while parsing WiFiLogger2 data. " + str(e))
-        except Exception as e:
-            LOGGER.error("longPoll::Failure trying to connect to WiFiLogger2 device. " + str(e))
+        except:
+            LOGGER.error("longPoll::Failure trying to connect to WiFiLogger2 device. ")
 
     def query(self):
         try:
