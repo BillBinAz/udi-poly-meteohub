@@ -100,59 +100,67 @@ class Controller(polyinterface.Controller):
 
     def longPoll(self):
         try:
-            # http get and read data
-            if self.ip == "":
-                print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
-                return
-
-            LOGGER.info("LongPoll")
-
-            #
-            # Get the latest data
-            wifi_logger_data = self.get_data()
-
             try:
-                # Parse the JSON data
+                # http get and read data
+                if self.ip == "":
+                    print(datetime.datetime.now().time(), " -  No IP/URL for WiFiLogger2.")
+                    return
+
+                LOGGER.info("LongPoll")
 
                 #
-                # Light
-                self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], convert_to_float(wifi_logger_data["uv"]))
-                self.nodes['light'].setDriver(uom.LITE_DRVS['solar_radiation'],
-                                              convert_to_float(wifi_logger_data["solar"]))
+                # Get the latest data
+                wifi_logger_data = self.get_data()
 
-                #
-                # Rain
-                self.nodes['rain'].setDriver(uom.RAIN_DRVS['rate'], convert_to_float(wifi_logger_data["rainr"]))
-                self.nodes['rain'].setDriver(uom.RAIN_DRVS['total'], convert_to_float(wifi_logger_data["rain24"]))
+                try:
+                    # Parse the JSON data
 
-                #
-                # Temperature
-                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'],
-                                                    f_to_c(convert_to_float(wifi_logger_data["dew"])))
-                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'],
-                                                    f_to_c(convert_to_float(wifi_logger_data["tempout"])))
-                self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'],
-                                                    f_to_c(convert_to_float(wifi_logger_data["chill"])))
+                    #
+                    # Light
+                    self.nodes['light'].setDriver(uom.LITE_DRVS['uv'], convert_to_float(wifi_logger_data["uv"]))
+                    self.nodes['light'].setDriver(uom.LITE_DRVS['solar_radiation'],
+                                                  convert_to_float(wifi_logger_data["solar"]))
 
-                #
-                # Humidity
-                self.nodes['humidity'].setDriver(uom.HUMD_DRVS['main'], convert_to_float(wifi_logger_data["humout"]))
+                    #
+                    # Rain
+                    self.nodes['rain'].setDriver(uom.RAIN_DRVS['rate'], convert_to_float(wifi_logger_data["rainr"]))
+                    self.nodes['rain'].setDriver(uom.RAIN_DRVS['total'], convert_to_float(wifi_logger_data["rain24"]))
 
-                #
-                # Pressure
-                self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'], convert_to_float(wifi_logger_data["bartr"]))
-                self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'], convert_to_float(wifi_logger_data["bar"]))
+                    #
+                    # Temperature
+                    self.nodes['temperature'].setDriver(uom.TEMP_DRVS['dewpoint'],
+                                                        f_to_c(convert_to_float(wifi_logger_data["dew"])))
+                    self.nodes['temperature'].setDriver(uom.TEMP_DRVS['main'],
+                                                        f_to_c(convert_to_float(wifi_logger_data["tempout"])))
+                    self.nodes['temperature'].setDriver(uom.TEMP_DRVS['windchill'],
+                                                        f_to_c(convert_to_float(wifi_logger_data["chill"])))
 
-                #
-                # Wind
-                self.nodes['wind'].setDriver(uom.WIND_DRVS['windspeed'], convert_to_float(wifi_logger_data["windspd"]))
-                self.nodes['wind'].setDriver(uom.WIND_DRVS['gustspeed'], convert_to_float(wifi_logger_data["gust"]))
-                self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'], convert_to_float(wifi_logger_data["winddir"]))
+                    #
+                    # Humidity
+                    self.nodes['humidity'].setDriver(uom.HUMD_DRVS['main'],
+                                                     convert_to_float(wifi_logger_data["humout"]))
 
-            except Exception as e:
-                LOGGER.error("longPoll::Failure while parsing WiFiLogger2 data. " + str(e))
-        except Exception as e:
-            LOGGER.error("longPoll::Failure trying to connect to WiFiLogger2 device. " + str(e))
+                    #
+                    # Pressure
+                    self.nodes['pressure'].setDriver(uom.PRES_DRVS['station'],
+                                                     convert_to_float(wifi_logger_data["bartr"]))
+                    self.nodes['pressure'].setDriver(uom.PRES_DRVS['sealevel'],
+                                                     convert_to_float(wifi_logger_data["bar"]))
+
+                    #
+                    # Wind
+                    self.nodes['wind'].setDriver(uom.WIND_DRVS['windspeed'],
+                                                 convert_to_float(wifi_logger_data["windspd"]))
+                    self.nodes['wind'].setDriver(uom.WIND_DRVS['gustspeed'], convert_to_float(wifi_logger_data["gust"]))
+                    self.nodes['wind'].setDriver(uom.WIND_DRVS['winddir'],
+                                                 convert_to_float(wifi_logger_data["winddir"]))
+
+                except Exception as e:
+                    LOGGER.error("longPoll::Failure while parsing WiFiLogger2 data. " + str(e))
+            except Exception as ex:
+                LOGGER.error("longPoll::Failure trying to connect to WiFiLogger2 device. " + str(ex))
+        except:
+            LOGGER.error("longPoll::Failure general catch.")
 
     def query(self):
         try:
