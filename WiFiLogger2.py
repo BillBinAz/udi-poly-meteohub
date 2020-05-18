@@ -95,8 +95,8 @@ class Controller(polyinterface.Controller):
                 print(datetime.datetime.now().time(), " -  Bad response from WiFiLogger2. " + str(resp))
 
             return json.loads(content.decode('utf-8'))
-        except Exception as e:
-            LOGGER.error("Failure get_date() " + str(e))
+        except:
+            LOGGER.error("Failure get_data() ")
 
     def longPoll(self):
         try:
